@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        *{
+            box-sizing: border-box;
+        }
+        body{
+            margin: 0;
+            width: 100%;
+            min-height: 100vh;
+            background-color: #F06060;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }   
+        .dashboard{
+            width: 100%;
+            display: flex;
+            justify-content: space-evenly;
+        }
+        .dashboard>div{
+            width: 100px;
+            background-color: blanchedalmond;
+            text-align: center;
+        }
+        .container{
+            width: 500px;
+            height: 500px;
+            background-color: #ddd;
+            border-radius: 10px;
+            padding: 10px;
+            display: flex;
+            flex-wrap: wrap;
+        }
+        .control{
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .box{
+            border: 5px solid #ddd;
+            border-radius: 10px;
+        }
+        .box.anwser{
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <div class="score">分數:0分</div>
+        <div class="timer">剩餘20秒</div>
+    </div>
+    <div class="container">
+        
+    </div>
+    <div class="control">
+        <button class="stop">暫停計時</button>
+    </div>
+    <script>
+        const containerElement = document.querySelector('.container');
+        const scoreElement = document.querySelector('.score')
+        const timerElement = document.querySelector('.timer')
+        const stopBtn = document.querySelector('.stop')
+
+        let score = 0
+        let time = 20
+        let RunOrNot = true
+
+       
+        function createBox() {
+            // 單邊個數，先用亂數去決定生成的格子數量，移進function讓他每次都會更換
+            // let side = Math.floor(Math.random() * 3) + 2;
+
+            // 依照分數改變方塊數量 (1~5 => 2, 6~15 3, 16~25 4, 26~35 5)
+            let side = 0
+            if (score <= 5){
+                side = 2
+            }else if(score <= 15){
+                side = 3
+            }else if(score <= 25){
+                side = 4
+            }else if(score <= 35){
+                side = 5
+            }else{
+                side = 6
+            }
+
+            let boxes = '';
+            // 0 ~ 總數-1 的隨機數
+            let anwser = Math.floor(Math.random() * side ** 2);
+            // 為了隨機生成顏色, 亂數產生 RGB 三個數值(範圍0~255)
+            let colorR = Math.floor(Math.random() * 256);
+            let colorG = Math.floor(Math.random() * 256);
+            let colorB = Math.floor(Math.random() * 256);
+
+            // 改變難度 = 改變透明度, 先用亂數去產生 0.4 ~ 0.8   
+            // let opacity = (Math.floor(Math.random() * 5)+4) * 0.1;
+
+            // 改變難度 (前10題 0.4, 11~20 0.6, 21~30  0.8)
+            let opacity = 0
+            if (score <= 10){
+                opacity = 0.4
+            }else if(score <= 20){
+                opacity = 0.6
+            }else{
+                opacity = 0.8
+            }
+
+            for(let i = 0;i < side**2;i++){
+                
+                if(i == anwser){
+                    boxes += `<div class="box anwser" style="opacity: ${opacity}; width: calc(100% / ${side}); height: calc(100% / ${side});background-color: rgb(${colorR}, ${colorG}, ${colorB});"></div>`;
+                }else{
+                    boxes += `<div class="box" style="width: calc(100% / ${side}); height: calc(100% / ${side}); background-color: rgb(${colorR}, ${colorG}, ${colorB});"></div>`;
+                }
+            }
+            containerElement.innerHTML = boxes;
+        }
+        function anwserSetting() {
+            //做完方塊之後, 我們在正確答案的方塊上綁定重設的事件
+            const anwserElement = document.querySelector('.box.anwser');
+            anwserElement.addEventListener('click',function () {
+                // 當使用者點到正確的方塊.....
+                score += 1  // score = score + 1
+                scoreElement.innerHTML = `分數:${score}分`
+
+                // 給下一題
+                resetContainer();
+            });
+        }
+        function resetContainer() {
+            createBox();
+            anwserSetting();
+        }
+        
+        resetContainer();
+
+
+        // 1. 變換顏色 成功
+        // 2. 變換數量 成功
+        // 3. 難度(透明度) 成功
+        // 4. 計分 成功
+        // 5. 計時 成功
+        // 5-1. 停止 成功
+        // 6. 暫停 成功
+        // 6-1. 再開始 成功
+        // 7. 結束遊戲
+
+
+        // 小規模測試 settimeout是否真的有用🤔
+        // 結果 他是延遲執行用的, 不會重複
+        // setTimeout('我要執行的程式碼', 多少毫秒後 執行一次)
+        // var a = setTimeout('console.log("hahaha")',1000)
+
+        // 小規模測試  setInterval 是否就會重複了呢
+        // 結果 他可以重複執行需要的程式
+        // setInterval('我要執行的程式碼', 每多少毫秒後重複執行)
+        // setInterval('console.log("一秒經過")',1000)  他可以用字串寫入指令
+        // setInterval(try_count,1000)  他可以呼叫函式 (不需要括弧)
+     
+        // setInterval也可以直接使用匿名函式
+        
+        var countdown = setInterval(function(){
+            time = time - 0.1
+            timerElement.innerHTML = `剩餘:${time.toFixed(1)}秒`
+            //扣完時間後, 確認是否時間到了
+            if (time <= 0){
+                //時間到了, 停止計時器 clearInterval(要停止的計時器)
+                clearInterval(countdown)
+            }
+        },100)
+
+        stopBtn.addEventListener('click',function () {
+            // 藉由RunOrNot來判斷是否正在執行
+            if (RunOrNot){
+                clearInterval(countdown)
+                //倒數的執行狀態改為false
+                RunOrNot = false
+            }else{
+                countdown = setInterval(function(){
+                    time = time - 0.1
+                    timerElement.innerHTML = `剩餘:${time.toFixed(1)}秒`
+                    //扣完時間後, 確認是否時間到了
+                    if (time <= 0){
+                        //時間到了, 停止計時器 clearInterval(要停止的計時器)
+                        clearInterval(countdown)
+                    }
+                },100)
+                //倒數的執行狀態改為true
+                RunOrNot = true
+            }
+            
+        });
+        
+        
+
+
+
+    </script>
+</body>
+</html>
